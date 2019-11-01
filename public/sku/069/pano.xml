@@ -1,0 +1,73 @@
+<krpano version="1.19" title="Pos3D">
+
+	<include url="/skin/vtourskin.xml" />
+	<skin_settings maps="false" maps_type="google" maps_bing_api_key="" maps_google_api_key="" maps_zoombuttons="false" gyro="true" webvr="true" webvr_gyro_keeplookingdirection="false" littleplanetintro="false" title="true" thumbs="true" thumbs_width="120" thumbs_height="80" thumbs_padding="10" thumbs_crop="" thumbs_opened="false" thumbs_text="true" thumbs_dragging="true" thumbs_onhoverscrolling="false" thumbs_scrollbuttons="false" thumbs_scrollindicator="false" thumbs_loop="false" tooltips_buttons="false" tooltips_thumbs="false" tooltips_hotspots="false" tooltips_mapspots="false" deeplinking="false" loadscene_flags="MERGE" loadscene_blend="OPENBLEND(0.5, 0.0, 0.75, 0.05, linear)" loadscene_blend_prev="SLIDEBLEND(0.5, 180, 0.75, linear)" loadscene_blend_next="SLIDEBLEND(0.5,   0, 0.75, linear)" loadingtext="loading..." layout_width="100%" layout_maxwidth="814" controlbar_width="-24" controlbar_height="40" controlbar_offset="20" controlbar_offset_closed="-40" controlbar_overlap.no-fractionalscaling="10" controlbar_overlap.fractionalscaling="0" design_skin_images="vtourskin.png" design_bgcolor="0x2D3E50" design_bgalpha="0.8" design_bgborder="0" design_bgroundedge="1" design_bgshadow="0 4 10 0x000000 0.3" design_thumbborder_bgborder="3 0xFFFFFF 1.0" design_thumbborder_padding="2" design_thumbborder_bgroundedge="0" design_text_css="color:#FFFFFF; font-family:Arial;" design_text_shadow="1" />
+
+	<action name="startup" autorun="onstart">
+		if(startscene === null OR !scene[get(startscene)], copy(startscene,scene[0].name); );
+		loadscene(get(startscene), null, MERGE);
+		if(startactions !== null, startactions() );
+	</action>
+
+	<scene name="scene_Phong_khach" title="Phòng khách" onstart="" thumburl="panos/Phong_khach.tiles/thumb.jpg" lat="" lng="" heading="">
+
+		<view hlookat="67.191" vlookat="1.522" fovtype="MFOV" fov="120.000" maxpixelzoom="2.0" fovmin="70" fovmax="140" limitview="auto" />
+
+		<preview url="panos/Phong_khach.tiles/preview.jpg" />
+
+		<image>
+			<cube url="panos/Phong_khach.tiles/pano_%s.jpg" />
+		</image>
+		<hotspot name="spot1" style="skin_hotspotstyle" ath="94.600" atv="3.839" linkedscene="scene_phong_ngu" bgalpha="0.5"  />
+		<layer parent="hotspot[spot1]" y="-14" type="text" align="centerbottom" html="[b]Phòng ngủ (Mã 8031)[/b]" css="font-family:Arial; font-size:16px; color:#000000;" padding="5" bgroundedge="3"/>
+
+		<hotspot name="spot2" style="skin_hotspotstyle" ath="-89.684" atv="21.769" linkedscene="scene_phong_bep" />
+		<layer parent="hotspot[spot2]" y="-14" type="text" align="centerbottom" html="[b]Phòng bếp[/b]" css="font-family:Arial; font-size:16px; color:#000000;" padding="5" bgroundedge="3"/>
+
+	</scene>
+
+	<scene name="scene_Phong_bep" title="Phòng bếp" onstart="" thumburl="panos/Phong_bep.tiles/thumb.jpg" lat="" lng="" heading="">
+
+		<view hlookat="-15.581" vlookat="5.961" fovtype="MFOV" fov="120.000" maxpixelzoom="2.0" fovmin="70" fovmax="140" limitview="auto" />
+
+		<preview url="panos/Phong_bep.tiles/preview.jpg" />
+
+		<image>
+			<cube url="panos/Phong_bep.tiles/pano_%s.jpg" />
+		</image>
+		<hotspot name="spot1" style="skin_hotspotstyle" ath="108.353" atv="18.466" linkedscene="scene_phong_khach" />
+		<layer parent="hotspot[spot1]" y="-14" type="text" align="centerbottom" html="[b]Phòng khách[/b]" css="font-family:Arial; font-size:16px; color:#000000;" padding="5" bgroundedge="3"/>
+
+	</scene>
+
+
+	<scene name="scene_Phong_Ngu" title="Phòng ngủ" onstart="" thumburl="panos/Phong_Ngu.tiles/thumb.jpg" lat="" lng="" heading="">
+
+		<view hlookat="-12.340" vlookat="0.732" fovtype="MFOV" fov="120.000" maxpixelzoom="2.0" fovmin="70" fovmax="140" limitview="auto" />
+
+		<preview url="panos/Phong_Ngu.tiles/preview.jpg" />
+
+		<image>
+			<cube url="panos/Phong_Ngu.tiles/pano_%s.jpg" />
+		</image>
+		<hotspot name="spot1" style="skin_hotspotstyle" ath="34.580" atv="10.139" linkedscene="scene_phong_tam" />
+		<layer parent="hotspot[spot1]" y="-14" type="text" align="centerbottom" html="[b]Phòng tắm[/b]" css="font-family:Arial; font-size:16px; color:#000000;" padding="5" bgroundedge="3"/>
+		<hotspot name="spot2" style="skin_hotspotstyle" ath="-108.234" atv="8.731" linkedscene="scene_phong_khach" />
+		<layer parent="hotspot[spot2]" y="-14" type="text" align="centerbottom" html="[b]Phòng khách[/b]" css="font-family:Arial; font-size:16px; color:#000000;" padding="5" bgroundedge="3"/>
+
+	</scene>
+
+	<scene name="scene_Phong_tam" title="Phòng tắm" onstart="" thumburl="panos/Phong_tam.tiles/thumb.jpg" lat="" lng="" heading="">
+
+		<view hlookat="-37.019" vlookat="7.947" fovtype="MFOV" fov="120.000" maxpixelzoom="2.0" fovmin="70" fovmax="140" limitview="auto" />
+
+		<preview url="panos/Phong_tam.tiles/preview.jpg" />
+
+		<image>
+			<cube url="panos/Phong_tam.tiles/pano_%s.jpg" />
+		</image>
+		<hotspot name="spot1" style="skin_hotspotstyle" ath="-149.404" atv="21.965" linkedscene="scene_phong_ngu" />
+		<layer parent="hotspot[spot1]" y="-14" type="text" align="centerbottom" html="[b]Phòng ngủ[/b]" css="font-family:Arial; font-size:16px; color:#000000;" padding="5" bgroundedge="3"/>
+	</scene>
+
+</krpano>

@@ -1,0 +1,58 @@
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+#krpano {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.visible {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 0.5s linear;
+}
+
+.hidden {
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0s 0.5s, opacity 0.5s linear;
+}
+
+#editing {
+  display: none;
+  position: absolute;
+  z-index: 999;
+}
+
+#infos {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 99999;
+}
+
+#info_overlay {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  background: #000000;
+  opacity: 0.9;
+}
+
+#info_image {
+  position: absolute;
+  z-index: 2;
+}

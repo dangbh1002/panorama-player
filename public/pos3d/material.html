@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        body {
+            background-color: #000;
+            margin: 0;
+            overflow: hidden;
+            padding: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container"></div>
+
+    <script type="module">
+
+        import * as THREE from '../build/three.module.js';
+        import { OrbitControls } from './jsm/controls/OrbitControls.js';
+        import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
+        import { FBXLoader } from './jsm/loaders/FBXLoader.js';
+
+        import { MTLLoader } from './jsm/loaders/MTLLoader.js';
+        import { OBJLoader } from './jsm/loaders/OBJLoader.js';
+
+        /**
+         * Define constants.
+         */
+        const TEXTURE_PATH = 'https://s3-us-west-2.amazonaws.com/s.cdpn.io/123879/';
+
+        /**
+         * Set our global variables.
+         */
+        var camera,
+            scene,
+            renderer,
+            controls,
+            element,
+            container,
+            rotationPoint,
+            lightRotationPoint,
+            textureCube;
+
+        var mirrorSphere, mirrorSphereCamera;
+        var table, tableCamera;
+        var table2, tableCamera2;
+        var mixer;
+
+        init();
+        animate();
+
+        /**
+         * Initializer function.
+         */
+        function init() {
+
+            // Build the container
+            container = document.createElement('div');
+            document.body.appendChild(container);
+
+            // Create the scene.
+            var urls = [
+                TEXTURE_PATH + 'px.jpg', TEXTURE_PATH + 'nx.jpg',
+                TEXTURE_PATH + 'py.jpg', TEXTURE_PATH + 'ny.jpg',
+                TEXTURE_PATH + 'pz.jpg', TEXTURE_PATH + 'nz.jpg',
+            ];
+            var loader = new THREE.CubeTextureLoader();
+            loader.crossOrigin = "";
+            var textureCube = loader.load(urls);
+            textureCube.format = THREE.RGBFormat;
+
+
+            scene = new THREE.Scene();
+            scene.background = textureCube;
+
+
+            createScene();
+
+
+            // Create a rotation points.
+            rotationPoint = new THREE.Object3D();
+            rotationPoint.position.set(0, 0, 0);
+            scene.add(rotationPoint);
+
+            // Create the camera.
+            camera = new THREE.PerspectiveCamera(
+                45, // Angle
+                window.innerWidth / window.innerHeight, // Aspect Ratio.
+                1, // Near view.
+                23000 // Far view.
+            );
+            camera.position.z = -1500;
+            camera.position.y = 800;
+
+            rotationPoint.add(camera);
+
+            // Build the renderer.
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            element = renderer.domElement;
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled;
+            container.appendChild(element);
+
+            // Build the controls.
+            controls = new OrbitControls(camera, element);
+            controls.enablePan = true;
+            controls.enableZoom = true;
+            controls.maxDistance = 2000;
+            controls.minDistance = 500;
+            controls.maxPolarAngle = Math.PI / 2;
+            controls.target.copy(new THREE.Vector3(0, 200, 0));
+            camera.lookAt(new THREE.Vector3(0, 200, 0));
+
+            function setOrientationControls(e) {
+                if (!e.alpha) {
+                    return;
+                }
+
+                controls = new THREE.DeviceOrientationControls(camera);
+                controls.connect();
+
+                window.removeEventListener('deviceorientation', setOrientationControls, true);
+            }
+            window.addEventListener('deviceorientation', setOrientationControls, true);
+
+
+            window.addEventListener('resize', onWindowResize, false);
+        }
+
+        function createScene() {
+
+            createBase();
+
+            createLight();
+
+            createSphere();
+
+            createTable();
+
+        }
+
+
+        /**
+         * Events to fire upon window resizing.
+         */
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+
+        function loadMaterial(path, repeatX, repeatY) {
+            var loader = new THREE.TextureLoader().setPath(path);
+
+            // const aoMap = loader.load('ao.jpg');
+            // aoMap.wrapS = THREE.RepeatWrapping;
+            // aoMap.wrapT = THREE.RepeatWrapping;
+            // aoMap.repeat.set(repeatX, repeatY);
+
+            const displacementMap = loader.load('displacement.jpg');
+            displacementMap.wrapS = THREE.RepeatWrapping;
+            displacementMap.wrapT = THREE.RepeatWrapping;
+            displacementMap.repeat.set(repeatX, repeatY);
+
+            const map = loader.load('map.jpg');
+            map.wrapS = THREE.RepeatWrapping;
+            map.wrapT = THREE.RepeatWrapping;
+            map.repeat.set(repeatX, repeatY);
+
+            const normalMap = loader.load('normal.jpg');
+            normalMap.wrapS = THREE.RepeatWrapping;
+            normalMap.wrapT = THREE.RepeatWrapping;
+            normalMap.repeat.set(repeatX, repeatY);
+
+            // const metalnessMap = loader.load('metalness.jpg');
+            // metalnessMap.wrapS = THREE.RepeatWrapping;
+            // metalnessMap.wrapT = THREE.RepeatWrapping;
+            // metalnessMap.repeat.set(repeatX, repeatY);
+
+            const roughnessMap = loader.load('roughness.jpg');
+            roughnessMap.wrapS = THREE.RepeatWrapping;
+            roughnessMap.wrapT = THREE.RepeatWrapping;
+            roughnessMap.repeat.set(repeatX, repeatY);
+
+
+            return new THREE.MeshStandardMaterial({
+                fog: true,
+                // aoMap: aoMap,
+                displacementMap: displacementMap,
+                map: map,
+                normalMap: normalMap,
+                // metalnessMap: metalnessMap,
+                roughnessMap: roughnessMap,
+                metalness: 0,
+                roughness: 20,
+                // envMap: this.scene.background.texture
+            });
+
+        }
+
+        function createBase() {
+            // Create a floor.  
+
+            var material = loadMaterial('../libs/textures/[2K]Planks19/', 64, 64);
+
+            // Create the floor geometry and mesh. Add to scene.
+            var geometry = new THREE.PlaneGeometry(50000, 50000);
+            geometry.computeFaceNormals();
+            var floor = new THREE.Mesh(geometry, material);
+            floor.position.set(0, 0, 0);
+            floor.rotation.x = -Math.PI / 2;
+            floor.receiveShadow = true;
+            scene.add(floor);
+        }
+
+        function createLight() {
+            // light rotation point.
+            lightRotationPoint = new THREE.Object3D();
+            lightRotationPoint.position.set(0, 0, 0);
+            scene.add(lightRotationPoint);
+
+            // Ambient lights
+            var ambient = new THREE.AmbientLight(0xffffff);
+            scene.add(ambient);
+
+            // SUN
+            var sun = new THREE.PointLight(0xffffcc, 1, 6000);
+            sun.position.set(4000, 1000, -4000);
+            scene.add(sun);
+
+            var sun1 = new THREE.PointLight(0xffffcc, 1, 6000);
+            sun1.position.set(-4000, 1000, -4000);
+            scene.add(sun1);
+
+            var sun2 = new THREE.PointLight(0xffffcc, 1, 6000);
+            sun2.position.set(-4000, 1000, 4000);
+            scene.add(sun2);
+
+            var sun3 = new THREE.PointLight(0xffffcc, 1, 6000);
+            sun3.position.set(4000, 1000, 4000);
+            scene.add(sun3);
+
+
+            // SMALL LIGHT
+            var light = new THREE.PointLight(0xff0040, 1, 1000);
+            light.position.set(-200, 200, -175);
+            lightRotationPoint.add(light);
+            var lightGeometry = new THREE.SphereBufferGeometry(10, 8, 8);
+            var lightMaterial = new THREE.MeshLambertMaterial({
+                color: 0xff0040
+            });
+            var lightBall = new THREE.Mesh(lightGeometry, lightMaterial);
+            lightBall.position.set(-200, 200, -175);
+            lightRotationPoint.add(lightBall);
+
+            var light2 = new THREE.PointLight(0x0040ff, 1, 1000);
+            light2.position.set(200, 200, -175);
+            lightRotationPoint.add(light2);
+            var lightGeometry2 = new THREE.SphereBufferGeometry(10, 8, 8);
+            var lightMaterial2 = new THREE.MeshLambertMaterial({
+                color: 0x0040ff
+            });
+            var lightBall = new THREE.Mesh(lightGeometry2, lightMaterial2);
+            lightBall.position.set(200, 200, -175);
+            lightRotationPoint.add(lightBall);
+
+            var light3 = new THREE.PointLight(0x80ff80, 1, 1000);
+            light3.position.set(200, 200, 175);
+            lightRotationPoint.add(light3);
+            var lightGeometry3 = new THREE.SphereBufferGeometry(10, 8, 8);
+            var lightMaterial3 = new THREE.MeshLambertMaterial({
+                color: 0x80ff80
+            });
+            var lightBall = new THREE.Mesh(lightGeometry3, lightMaterial3);
+            lightBall.position.set(200, 200, 175);
+            lightRotationPoint.add(lightBall);
+
+            var light4 = new THREE.PointLight(0xffaa00, 1, 1000);
+            light4.position.set(-200, 200, 175);
+            lightRotationPoint.add(light4);
+            var lightGeometry4 = new THREE.SphereBufferGeometry(10, 8, 8);
+            var lightMaterial4 = new THREE.MeshLambertMaterial({
+                color: 0xffaa00
+            });
+            var lightBall = new THREE.Mesh(lightGeometry4, lightMaterial4);
+            lightBall.position.set(-200, 200, 175);
+            lightRotationPoint.add(lightBall);
+
+            var light5 = new THREE.PointLight(0x777777, 1, 1400);
+            light5.position.set(0, 1000, 0);
+            scene.add(light5);
+
+        }
+
+        function createSphere() {
+            var geometry = new THREE.SphereGeometry(200, 64, 64);
+            mirrorSphereCamera = new THREE.CubeCamera(0.1, 5000, 512);
+            scene.add(mirrorSphereCamera);
+
+            var mirrorSphereMaterial = new THREE.MeshStandardMaterial({ envMap: mirrorSphereCamera.renderTarget.texture, roughness: 0, metalness: 1 });
+            mirrorSphere = new THREE.Mesh(geometry, mirrorSphereMaterial);
+            mirrorSphere.position.set(0, 0, 0);
+            mirrorSphereCamera.position.set(0, 0, 0);
+            scene.add(mirrorSphere);
+        }
+
+        function createTable() {
+
+            // table
+            tableCamera = new THREE.CubeCamera(0.1, 5000, 512);
+            scene.add(tableCamera);
+
+            var loader = new GLTFLoader().setPath('models/chevrolet_corvette_z06/');
+            loader.load('scene.gltf', function (gltf) {
+                gltf.scene.traverse(function (child) {
+                    if (child.isMesh) {
+                        child.material.envMap = tableCamera.renderTarget.texture;
+                        child.material.roughness = 30;
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                    }
+                });
+                table = gltf.scene;
+                table.scale.set(10, 10, 10);
+                table.position.set(-5000, 10, 2350);
+                tableCamera.position.set(-5000, 10, 2350);
+                scene.add(table);
+            });
+
+        }
+
+
+        /**
+         * Animate the scene.
+         */
+        function animate() {
+            requestAnimationFrame(animate);
+            camera.updateProjectionMatrix();
+            render();
+        }
+
+
+        /**
+         * Render the scene.
+         */
+        function render() {
+            // Render the main sphere.
+            mirrorSphere.visible = false;
+            mirrorSphereCamera.update(renderer, scene);
+            mirrorSphere.visible = true;
+
+            if (table) {
+                table.visible = false;
+                tableCamera.update(renderer, scene);
+                table.visible = true;
+            }
+
+            // Render the scene.
+            renderer.render(scene, camera);
+
+            // Rotate the lights.
+            lightRotationPoint.rotation.y += 0.005;
+
+            // Slowly rotate the scene.
+            rotationPoint.rotation.y += 0.0005;
+        }
+
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,241 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+	<title>House Platform Viewer</title>
+	<meta name="viewport"
+		content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+	<meta http-equiv="x-ua-compatible" content="IE=edge" />
+	<style>
+		@-ms-viewport {
+			width: device-width;
+		}
+
+		@media only screen and (min-device-width:800px) {
+			html {
+				overflow: hidden;
+			}
+		}
+
+		html {
+			height: 100%;
+		}
+
+		body {
+			height: 100%;
+			overflow: hidden;
+			margin: 0;
+			padding: 0;
+			font-family: Arial, Helvetica, sans-serif;
+			font-size: 16px;
+			color: #FFFFFF;
+			background-color: #000000;
+		}
+
+		.visible {
+			visibility: visible;
+			opacity: 1;
+			transition: opacity 0.5s linear;
+		}
+
+		.hidden {
+			visibility: hidden;
+			opacity: 0;
+			transition: visibility 0s 0.5s, opacity 0.5s linear;
+		}
+
+		#editing {
+			display: none;
+			position: absolute;
+			z-index: 999;
+		}
+
+		#infos {
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			z-index: 99999;
+			top: 0;
+		}
+
+		#info_overlay {
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			top: 0;
+			left: 0;
+			z-index: 1;
+			background: #000000;
+			opacity: 0.9;
+		}
+
+		#info_image {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			z-index: 2;
+			width: 100%;
+		}
+
+		@media only screen and (min-width: 500px) {
+			#info_image {
+				width: 70%;
+			}
+		}
+	</style>
+</head>
+
+<body>
+	<img src="assets/img/logo.png"
+		style="position: absolute; left: 20px; top: 20px; z-index: 999; width: 60px; opacity: 0.7">
+
+	<script src="krpano.js"></script>
+
+	<div id="pano" style="width:100%;height:100%;"></div>
+
+	<noscript>
+		<table style="width:100%;height:100%;">
+			<tr style="vertical-align:middle;text-align:center;">
+				<td>ERROR:<br><br>Javascript not activated<br><br></td>
+			</tr>
+		</table>
+	</noscript>
+
+	<div id="editing">
+		<input type="text" id="sku" value="PE4080.19031">
+		<input type="text" id="url" value="">
+		<button class="button" onclick="add_hotspot();">Add a Hotspot</button>
+	</div>
+
+	<div id="infos" class="hidden">
+		<div id="info_overlay" onclick="hideImage()"></div>
+		<img id="info_image" src="" alt="">
+	</div>
+
+	<script>
+		document.onkeydown = function (e) {
+			if (e.ctrlKey && e.altKey && e.key === "e") {
+				edit();
+			}
+		};
+
+		// TODO: Call api with _id => initvars data
+		var initvars = {
+			thumbUrl: 'panos/Phong_khach.tiles/thumb.jpg',
+			previewUrl: 'panos/Phong_khach.tiles/preview.jpg',
+			cubeUrl: 'panos/Phong_khach.tiles/pano_%s.jpg'
+		};
+
+		// global krpano interface (will be set in the onready callback)
+		var krpano = null;
+		var editing = false;
+
+		embedpano({ initvars: initvars, id: "krpanoSWFObject", onready: krpano_onready_callback, consolelog: true, swf: "krpano.swf", target: "pano", html5: "auto", mobilescale: 1.0, passQueryParameters: true });
+
+		// callback function that will be called when krpano is embedded and ready for using
+		function krpano_onready_callback(krpano_interface) {
+			krpano = krpano_interface;
+			setTimeout(_ => {
+				// add_hotspot("Tủ bếp", "infos/tubep.jpg", -20, -20);
+				// add_hotspot("Máy hút mùi BOSS", "infos/tubep.jpg", -5, -8.9);
+				// add_hotspot("Mặt đá Vstone", "infos/tubep.jpg", -30, 22);
+				// add_hotspot("Tasa 8306", "infos/Tasa 8306 - 800x800.jpg", 127, 52);
+				// add_hotspot("Tasa 4870", "infos/Tasa 4870 - 400x800.jpg", 107, -0.4);
+			}, 1000);
+		}
+
+		function edit() {
+			editing = !editing;
+			document.querySelector("#editing").style.display = editing ? "inherit" : "none";
+		}
+
+		function showImage(image_url) {
+			document.querySelector("#infos").setAttribute("class", "visible");
+			document.querySelector("#info_image").setAttribute("src", image_url);
+		}
+
+		function hideImage() {
+			document.querySelector("#infos").setAttribute("class", "hidden");
+		}
+
+		function add_hotspot(code, url, x, y) {
+			if (krpano) {
+				var h = x || krpano.get("view.hlookat");
+				var v = y || krpano.get("view.vlookat");
+				const id = Math.round(Date.now() + Math.random());
+				const hs_name = "hs_" + id;
+				const layer_name = "layer_" + id;
+				const layer_code = code || document.querySelector("#sku").value;
+				const image_url = url || document.querySelector("#url").value;
+
+				krpano.call("addHs(" + hs_name + ",hotspot_ani_white," + h + "," + v + "," + layer_name + "," + layer_code + ");");
+
+				if (krpano.get("device.html5")) {
+					// for HTML5 it's possible to assign JS functions directly to krpano events
+					krpano.set("hotspot[" + hs_name + "].onclick", function (hs) {
+						if (editing) {
+							remove_hotspot(hs_name);
+							remove_layer(layer_name);
+						} else {
+							showImage(image_url);
+						}
+					}.bind(null, id));
+				} else {
+					// for Flash the js() action need to be used to call from Flash to JS (this code would work for Flash and HTML5)
+					krpano.set("hotspot[" + hs_name + "].onclick", "js( alert(calc('hotspot \"' + name + '\" clicked')) );");
+				}
+			}
+		}
+
+		function remove_hotspot(hs_name) {
+			if (krpano) {
+				krpano.call("removehotspot(" + hs_name + ")");
+			}
+		}
+		function remove_layer(layer_name) {
+			if (krpano) {
+				krpano.call("removelayer(" + layer_name + ")");
+			}
+		}
+
+		var track_mouse_enabled = false;
+		var track_mouse_interval_id = null;
+
+		function track_mouse_interval_callback() {
+			var mx = krpano.get("mouse.x");
+			var my = krpano.get("mouse.y");
+			var pnt = krpano.screentosphere(mx, my);
+			var h = pnt.x;
+			var v = pnt.y;
+			document.getElementById("mousepos").innerHTML = 'x="' + mx + '" y="' + my + '" ath="' + h.toFixed(2) + '" atv="' + v.toFixed(2) + '"';
+		}
+
+		function track_mouse() {
+			if (krpano) {
+				if (track_mouse_enabled == false) {
+					// enable - call 60 times per second
+					track_mouse_interval_id = setInterval(track_mouse_interval_callback, 1000.0 / 60.0);
+
+					track_mouse_enabled = true;
+				}
+				else {
+					// disable
+					clearInterval(track_mouse_interval_id);
+					document.getElementById("mousepos").innerHTML = "";
+
+					track_mouse_enabled = false;
+				}
+			}
+		}
+
+
+
+
+	</script>
+</body>
+
+</html>

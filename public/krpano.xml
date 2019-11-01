@@ -1,0 +1,148 @@
+<krpano version="1.19" title="Pos3D">
+
+	<include url="skin/vtourskin.xml" />
+	<include url="plugins/showtext.xml" />
+
+	<!-- customize skin settings: maps, gyro, webvr, thumbnails, tooltips, layout, design, ... -->
+	<skin_settings maps="false"
+	               maps_type="google"
+	               maps_bing_api_key=""
+	               maps_google_api_key=""
+	               maps_zoombuttons="false"
+	               gyro="true"
+	               webvr="true"
+	               webvr_gyro_keeplookingdirection="false"
+	               webvr_prev_next_hotspots="true"
+	               littleplanetintro="false"
+	               title="true"
+	               thumbs="true"
+	               thumbs_width="120" thumbs_height="80" thumbs_padding="10" thumbs_crop="0|40|240|160"
+	               thumbs_opened="false"
+	               thumbs_text="false"
+	               thumbs_dragging="true"
+	               thumbs_onhoverscrolling="false"
+	               thumbs_scrollbuttons="false"
+	               thumbs_scrollindicator="false"
+	               thumbs_loop="false"
+	               tooltips_buttons="false"
+	               tooltips_thumbs="false"
+	               tooltips_hotspots="false"
+	               tooltips_mapspots="false"
+	               deeplinking="false"
+
+				   loadscene_flags="MERGE"
+				   loadscene_blend="OPENBLEND(0.5,   0, 0.75, linear)"
+				   loadingtext=""
+
+	               layout_width="100%"
+	               layout_maxwidth="814"
+	               controlbar_width="-24"
+	               controlbar_height="40"
+	               controlbar_offset="20"
+	               controlbar_offset_closed="-40"
+	               controlbar_overlap.no-fractionalscaling="10"
+	               controlbar_overlap.fractionalscaling="0"
+	               design_skin_images="vtourskin.png"
+	               design_bgcolor="0x2D3E50"
+	               design_bgalpha="0.8"
+	               design_bgborder="0"
+	               design_bgroundedge="1"
+	               design_bgshadow="0 4 10 0x000000 0.3"
+	               design_thumbborder_bgborder="3 0xFFFFFF 1.0"
+	               design_thumbborder_padding="2"
+	               design_thumbborder_bgroundedge="0"
+	               design_text_css="color:#FFFFFF; font-family:Arial;"
+	               design_text_shadow="1"
+	               />
+
+	<action name="trace1">
+		trace(1);
+	</action>
+	<action name="trace2">
+		trace(2);
+	</action>
+
+	<!-- startup action - load the first scene -->
+	<action name="startup" autorun="onstart">
+		set(hs_zorder, 1);
+		if(startscene === null OR !scene[get(startscene)], copy(startscene,scene[0].name); );
+		loadscene(get(startscene), null, MERGE);
+		if(startactions !== null, startactions() );
+	</action>
+
+	<action name="init_view">
+		if(
+			!loaded_first_time,
+			set(view.vlookat, 90);
+			set(view.hlookat, 90);
+			set(view.fisheye, 1);
+			set(view.fovtype, 'MFOV');
+			set(view.fov, 500);
+			set(view.fovmin, 70);
+			set(view.fovmax, 500);
+			delayedcall(0, cm_normal_view_tween());
+			set(loaded_first_time, true);
+		)
+	</action>
+
+	<action name="cm_normal_view_tween">
+			tween(view.vlookat, 0.0, 2, easeinoutquad);
+			tween(view.hlookat, 0.0, 2, easeinoutquad);
+			tween(view.fov, 100, 2, easeinoutquad);
+			tween(view.fovmax, 100, 2, easeinoutquad);
+			tween(view.fisheye, 0.0, 2, easeinoutquad);
+	</action>
+
+
+	<style name="hotspot_ani_white" url="skin/hotspot_ani_white_64x64x20.png" scale="0.5" crop="0|0|128|128" frames="25" framewidth="128" frameheight="128" frame="0" onloaded="hotspot_animate();"/>
+	<action name="hotspot_animate">
+		if(loaded, inc(frame,1,get(frames),0); mul(ypos,frame,frameheight); txtadd(crop,'0|',get(ypos),'|',get(framewidth),'|',get(frameheight)); delayedcall(0.03, hotspot_animate() ); );
+	</action>
+	<action name="addHs">
+		addhotspot(%1);
+		hotspot[%1].loadstyle(%2);
+		set(hotspot[%1].ath, %3);
+		set(hotspot[%1].atv, %4);
+		set(hotspot[%1].zorder, hs_zorder);
+		inc(hs_zorder);
+
+		addlayer(%5);
+		set(layer[%5].parent,hotspot[%1]);
+		set(layer[%5].align,centertop);
+		set(layer[%5].type,text);
+		set(layer[%5].html,%6);
+		set(layer[%5].css,font-family:Arial; font-size:16px; color:#000000;);
+		set(layer[%5].bgalpha,0.7);
+		inc(hs_zorder);
+	</action>
+
+	<scene name="scene_01" title="Gạch tasa 8306" thumburl="infos/thumbnail.jpg">
+		<image type="SPHERE">
+			<sphere url="panos/sphere.jpg"/>
+		</image>
+		<events onloadcomplete ="init_view()"/>
+		<hotspot name="hs_01" style="hotspot_ani_white" ath="127" atv="52" zorder="1" onclick="skin_showthumbs()" />
+		<layer name="layer_01" parent="hotspot[hs_01]" align="centertop" type="text" html="Gạch Tasa" css="font-family:Arial; font-size:16px; color:#000000;" bgalpha="0.7" onclick="skin_showthumbs()" />
+	</scene>
+
+	<scene name="scene_02" title="Gạch tasa 8307" thumburl="infos/thumbnail2.jpg">
+		<image type="SPHERE">
+			<sphere url="panos/sphere2.jpg"/>
+		</image>
+		<events onloadcomplete ="init_view()"/>
+
+		<hotspot name="hs_01" style="hotspot_ani_white" ath="127" atv="52" zorder="1" onclick="skin_showthumbs()" />
+		<layer name="layer_01" parent="hotspot[hs_01]" align="centertop" type="text" html="Gạch Tasa" css="font-family:Arial; font-size:16px; color:#000000;" bgalpha="0.7" onclick="skin_showthumbs()" />
+	</scene>
+
+	<scene name="scene_03" title="Gạch tasa 8307" thumburl="infos/thumbnail3.jpg">
+		<image type="SPHERE">
+			<sphere url="panos/sphere3.jpg"/>
+		</image>
+		<events onloadcomplete ="init_view()"/>
+
+		<hotspot name="hs_01" style="hotspot_ani_white" ath="127" atv="52" zorder="1" onclick="skin_showthumbs()" />
+		<layer name="layer_01" parent="hotspot[hs_01]" align="centertop" type="text" html="Gạch Tasa" css="font-family:Arial; font-size:16px; color:#000000;" bgalpha="0.7" onclick="skin_showthumbs()" />
+	</scene>
+
+</krpano>
