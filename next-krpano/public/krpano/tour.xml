@@ -55,13 +55,6 @@
 	               design_text_shadow="1"
 	               />
 
-	<action name="trace1">
-		trace(1);
-	</action>
-	<action name="trace2">
-		trace(2);
-	</action>
-
 	<!-- startup action - load the first scene -->
 	<action name="startup" autorun="onstart">
 		set(hs_zorder, 1);
@@ -104,16 +97,24 @@
 		set(hotspot[%1].ath, %3);
 		set(hotspot[%1].atv, %4);
 		set(hotspot[%1].zorder, hs_zorder);
+		set(hotspot[%1].keep, true);
 		inc(hs_zorder);
 
 		addlayer(%5);
-		set(layer[%5].parent,hotspot[%1]);
-		set(layer[%5].align,centertop);
-		set(layer[%5].type,text);
-		set(layer[%5].html,%6);
-		set(layer[%5].css,font-family:Arial; font-size:16px; color:#000000;);
-		set(layer[%5].bgalpha,0.7);
+		set(layer[%5].parent, hotspot[%1]);
+		set(layer[%5].align, centertop);
+		set(layer[%5].type, text);
+		set(layer[%5].html, %6);
+		set(layer[%5].css, font-family:Arial; font-size:16px; color:#000000;);
+		set(layer[%5].bgalpha, 0.7);
+		set(layer[%5].keep, true);
 		inc(hs_zorder);
+
+
+
+		scene.createarrayitem('brian');
+		set(scene[3].content,<image type="SPHERE"><sphere url="krpano/panos/sphere2.jpg"/></image>);
+		loadscene('brian');
 	</action>
 
 	<scene name="scene_01" title="Gạch tasa 8306" thumburl="infos/thumbnail.jpg">
@@ -121,8 +122,6 @@
 			<sphere url="panos/sphere.jpg"/>
 		</image>
 		<events onloadcomplete ="init_view()"/>
-		<hotspot name="hs_01" style="hotspot_ani_white" ath="127" atv="52" zorder="1" onclick="skin_showthumbs()" />
-		<layer name="layer_01" parent="hotspot[hs_01]" align="centertop" type="text" html="Gạch Tasa" css="font-family:Arial; font-size:16px; color:#000000;" bgalpha="0.7" onclick="skin_showthumbs()" />
 	</scene>
 
 	<scene name="scene_02" title="Gạch tasa 8307" thumburl="infos/thumbnail2.jpg">
@@ -130,9 +129,6 @@
 			<sphere url="panos/sphere2.jpg"/>
 		</image>
 		<events onloadcomplete ="init_view()"/>
-
-		<hotspot name="hs_01" style="hotspot_ani_white" ath="127" atv="52" zorder="1" onclick="skin_showthumbs()" />
-		<layer name="layer_01" parent="hotspot[hs_01]" align="centertop" type="text" html="Gạch Tasa" css="font-family:Arial; font-size:16px; color:#000000;" bgalpha="0.7" onclick="skin_showthumbs()" />
 	</scene>
 
 	<scene name="scene_03" title="Gạch tasa 8307" thumburl="infos/thumbnail3.jpg">
@@ -140,9 +136,6 @@
 			<sphere url="panos/sphere3.jpg"/>
 		</image>
 		<events onloadcomplete ="init_view()"/>
-
-		<hotspot name="hs_01" style="hotspot_ani_white" ath="127" atv="52" zorder="1" onclick="skin_showthumbs()" />
-		<layer name="layer_01" parent="hotspot[hs_01]" align="centertop" type="text" html="Gạch Tasa" css="font-family:Arial; font-size:16px; color:#000000;" bgalpha="0.7" onclick="skin_showthumbs()" />
 	</scene>
 
 </krpano>

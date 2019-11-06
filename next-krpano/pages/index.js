@@ -31,8 +31,8 @@ class DefaultName extends Component {
 
         this.setState({ krpano: krpano_interface }, _ => {
             setTimeout(_ => {
-                // this.add_hotspot("Tasa 8306", "krpano/infos/tasa-8306.jpg", 127, 52);
-            }, 2000);
+                this.add_hotspot("Tasa 8306", "krpano/infos/tasa-8306.jpg", 127, 52);
+            }, 3000);
 
         });
 
@@ -91,19 +91,17 @@ class DefaultName extends Component {
             const hs_name = "hs_" + id;
             const layer_name = "layer_" + id;
             const layer_code = code || this.state.sku;
-            const image_url = url || this.state.url;
 
             krpano.call("addHs(" + hs_name + ",hotspot_ani_white," + h + "," + v + "," + layer_name + "," + layer_code + ");");
 
             if (krpano.get("device.html5")) {
                 // for HTML5 it's possible to assign JS functions directly to krpano events
                 krpano.set("hotspot[" + hs_name + "].onclick", () => {
-
                     if (this.state.editing) {
                         this.remove_hotspot(hs_name);
                         this.remove_layer(layer_name);
                     } else {
-                        this.showImage(image_url);
+                        krpano.call('skin_showthumbs()');
                     }
                 });
             }
